@@ -1,0 +1,27 @@
+/* 查询数据，然后稍加修改就是一个完整的 JavaBean了。
+从MySQL快速生成JavaBean */
+
+
+SELECT
+    CONCAT('/**\n*',COLUMN_COMMENT,'\n*/\n'), --  注解
+    CONCAT('@Column(name = "',column_name,'")\n'), -- JPA字段注解
+    (                                              -- 根据表定义的字段生成相应的 Java类型
+        CASE
+            data_type 
+            WHEN 'varchar'
+            THEN 'private String'
+            WHEN 'bigint'
+            THEN 'private Integer'
+            WHEN 'int'
+            THEN 'private Integer'
+            WHEN 'date'
+            THEN 'private Date'
+            WHEN 'datetime'
+            THEN 'private Date'
+            ELSE 'NULL'
+        END
+    ) AS data_type,
+    CONCAT(' ',LOWER(column_name),';\n')   --  字段名
+FROM
+    information_schema.columns 
+WHERE TABLE_NAME = '表名' ;   
